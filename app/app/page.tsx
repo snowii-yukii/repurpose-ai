@@ -1,6 +1,16 @@
 import { UserButton } from "@clerk/nextjs";
+import { requireUser } from "@/lib/current-user";
+import { prisma } from "@/lib/prisma";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await requireUser();
+
+  const projectCount = await prisma.project.count({
+    where: {
+      userId: user.id,
+    },
+  });
+
   return (
     <main className="p-8">
       <div className="flex items-center justify-between">
@@ -9,7 +19,11 @@ export default function DashboardPage() {
       </div>
 
       <p className="mt-6 text-gray-600">
-        Your repurposed content projects will appear here.
+        You have {projectCount} project{projectCount === 1 ? "" : "s"}.
+      </p>
+
+      <p className="mt-2 text-sm text-green-700">
+        Your Clerk account is connected to Postgres.
       </p>
     </main>
   );
