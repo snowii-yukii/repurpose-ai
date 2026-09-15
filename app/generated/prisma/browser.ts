@@ -32,3 +32,8 @@ export type Profile = Prisma.ProfileModel
  * 
  */
 export type Project = Prisma.ProjectModel
+/**
+ * Model Generation
+ * 
+ */
+export type Generation = Prisma.GenerationModel

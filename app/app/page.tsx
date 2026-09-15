@@ -1,27 +1,36 @@
+import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { requireUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const projectCount = await prisma.project.count({
+  const projects = await prisma.project.findMany({
     where: {
       userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      _count: {
+        select: {
+          generations: true,
+        },
+      },
     },
   });
 
   return (
     <main className="p-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Your dashboard</h1>
+        <h1 className="text-2xl font-semibold">Your projects</h1>
         <UserButton />
       </div>
-
-      <p className="mt-6 text-gray-600">
-        You have {projectCount} project{projectCount === 1 ? "" : "s"}.
-      </p>
 
       <Link
         href="/app/new"
@@ -30,9 +39,33 @@ export default async function DashboardPage() {
         Create a project
       </Link>
 
-      <p className="mt-2 text-sm text-green-700">
-        Your Clerk account is connected to Postgres.
-      </p>
+      {projects.length === 0 ? (
+        <p className="mt-10 text-gray-600">
+          You have no projects yet. Create your first one above.
+        </p>
+      ) : (
+        <div className="mt-8 space-y-3">
+          {projects.map((project) => (
+            <Link
+              key={project.id}
+              href={`/app/projects/${project.id}`}
+              className="block rounded border p-4 hover:bg-gray-50"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="font-medium">{project.title}</h2>
+                <span className="text-sm text-gray-500">
+                  {project._count.generations} generation
+                  {project._count.generations === 1 ? "" : "s"}
+                </span>
+              </div>
+
+              <p className="mt-1 text-sm text-gray-500">
+                {project.createdAt.toLocaleDateString()}
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
