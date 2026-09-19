@@ -49,7 +49,7 @@ export default async function DashboardPage() {
             <Link
               key={project.id}
               href={`/app/projects/${project.id}`}
-              className="block rounded border p-4 hover:bg-gray-50"
+              className="block rounded border p-4"
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-medium">{project.title}</h2>
